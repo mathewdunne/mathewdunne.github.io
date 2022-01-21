@@ -1,7 +1,7 @@
-import '/css/style.css'
+import './css/style.css'
 
-import * as THREE from 'three'
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
+import * as THREE from 'https://cdn.skypack.dev/three'
+import {OrbitControls} from 'https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls.js'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
@@ -16,7 +16,7 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 
 renderer.render(scene, camera)
 
-const backgroundTexture = new THREE.TextureLoader().load('/assets/space.jpg')
+const backgroundTexture = new THREE.TextureLoader().load('./assets/space.jpg')
 scene.background = backgroundTexture
 
 // set up shape
