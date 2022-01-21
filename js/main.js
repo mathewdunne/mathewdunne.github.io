@@ -1,8 +1,6 @@
 import * as THREE from 'https://cdn.skypack.dev/three'
 import {OrbitControls} from 'https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls.js'
 
-import * from '../css/style.css' assert { type: 'css' };
-
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
 camera.position.setX(-65)
