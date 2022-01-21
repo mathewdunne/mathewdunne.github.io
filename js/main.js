@@ -16,7 +16,7 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 
 renderer.render(scene, camera)
 
-const backgroundTexture = new THREE.TextureLoader().load('./assets/space.jpg')
+const backgroundTexture = new THREE.TextureLoader().load('../assets/space.jpg')
 scene.background = backgroundTexture
 
 // set up shape
