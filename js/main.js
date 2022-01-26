@@ -107,7 +107,7 @@ window.addEventListener('resize', onWindowResize)
 // on click
 function printMousePos(event) {
   console.log("clientX: " + event.clientX + " - clientY: " + event.clientY)
-  const torqueFactor = 100
+  const torqueFactor = 120
   let yVec = screenMidx - event.clientX
   let zVec = screenMidy - event.clientY
   const mag = Math.sqrt(yVec*yVec + zVec*zVec)
