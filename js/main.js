@@ -1,5 +1,7 @@
-import * as THREE from 'https://cdn.skypack.dev/three'
-import {OrbitControls} from 'https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls.js'
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js'
+//import * as CANNON from '../node_modules/cannon/cannon-es.js'
+import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js'
+import {DragControls} from '../node_modules/three/examples/jsm/controls/DragControls.js'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
