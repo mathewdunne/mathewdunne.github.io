@@ -7,6 +7,11 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHei
 const orbitRadius = 70
 camera.position.setX(-1*orbitRadius)
 
+let clock = new THREE.Clock()
+let delta = 0
+let fps = 60
+let interval = 1/fps
+
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("#bg")
 })
@@ -33,7 +38,6 @@ var icoBody = new CANNON.Body({
   mass: 1,
 })
 icoBody.addShape(icoBodyShape)
-// icoBody.angularVelocity.set(10, 10, 10)
 icoBody.angularDamping = 0.3
 scene.add(ico)
 world.addBody(icoBody)
@@ -141,21 +145,25 @@ function spinShape(event) {
 
 function animate() {
   requestAnimationFrame(animate)
+  delta += clock.getDelta()
 
-  //animations go here
-  orbitCamera()  
-  
-  //update controls
-  orbitControls.update()
+  if (delta > interval) {
+    //animations go here
+    orbitCamera()  
+    
+    //update controls
+    orbitControls.update()
 
-  //update physics
-  world.fixedStep()
-  // Copy coordinates from cannon.js to three.js
-  ico.position.copy(icoBody.position)
-  ico.quaternion.copy(icoBody.quaternion)
+    //update physics
+    world.fixedStep()
+    // Copy coordinates from cannon.js to three.js
+    ico.position.copy(icoBody.position)
+    ico.quaternion.copy(icoBody.quaternion)
 
 
-  renderer.render(scene, camera)
+    renderer.render(scene, camera)
+    delta = delta % interval
+  } 
 }
 
 // call animation function
