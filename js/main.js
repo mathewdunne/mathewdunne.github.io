@@ -142,8 +142,15 @@ function spinShape(event) {
   icoBody.applyTorque(torque)
 }
 
-// main animation loop
+// on scroll
+function scrollDown() {
+  const x = document.body.getBoundingClientRect().top
+  console.log(x)
+  ambientLight.intensity =0.4 + x*0.001
+}
+document.body.onscroll = scrollDown;
 
+// main animation loop
 function animate() {
   requestAnimationFrame(animate)
   delta += clock.getDelta()

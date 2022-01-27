@@ -24,7 +24,7 @@
 
 
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <!-- <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
         <div class="container px-4 px-lg-5">
           <a class="navbar-brand" href="./index.html#page-top">
             <img src="./assets/img/favicon.png" width="30" height="30" class="d-inline-block align-top"> 
@@ -40,7 +40,40 @@
                 </ul>
             </div>
         </div>
-      </nav>
+      </nav> -->
+  <div class="container col-8 fixed-top pt-3 px-0">
+    <nav class="navbar navbar-expand-md navbar-dark" id="navbar">
+      <a href="./index.html#page-top" class="navbar-brand text-white">
+        <img src="./assets/img/favicon.png" width="30" height="30" class="d-inline-block align-top">
+        My Website
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#toggle-mobile-navbar"
+        aria-controls="toggle-mobile-navbar"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collape navbar-collapse" id="toggle-mobile-navbar">
+        <ul class="navbar-nav ms-auto text-center">
+          <li>
+            <a class="nav-link text-white" href="./about.html">About</a>
+          </li>
+          <!-- <li>
+            <a class="nav-link" href="#">Item 2</a>
+          </li>
+          <li>
+            <a class="nav-link" href="#">Item 3</a>
+          </li> -->
+        </ul>
+      </div>
+
+    </nav>
+  </div>
 
   <!-- Masthead-->
   <header class="masthead noselect">
@@ -55,8 +88,20 @@
       </div>
     </div>
   </header>
+  <!-- <header class="masthead noselect">
+    <div class="container d-flex h-100 align-items-center justify-content-center">
+      <div class="d-flex justify-content-center">
+        <div class="text-center">
+          <h1 class="mx-auto my-0 text-uppercase">Mathew Dunne</h1>
+          <h2 class="text-white mx-auto mt-2 mb-2">This is an interactive website made by Mathew Dunne.</h2>
+          <h2 class="text-white mx-auto mt-2 mb-5">Click anywhere to spin the shape!</h2>
+          <a class="btn btn-info" href="./about.html">About Me</a>
+        </div>
+      </div>
+    </div>
+  </header> -->
 
-
+  
 
   <script type="module" src="./js/main.js"></script>
 </body>
