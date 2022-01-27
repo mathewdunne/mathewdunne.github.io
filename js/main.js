@@ -33,7 +33,7 @@ let screenMidy = window.innerHeight/2
 const icoGeometry = new THREE.IcosahedronGeometry(20, 0)
 const icoMaterial = new THREE.MeshStandardMaterial({color: 0x46d4a2})
 const ico = new THREE.Mesh(icoGeometry, icoMaterial)
-const icoBodyShape = new CANNON.Box(new CANNON.Vec3(1, 1, 1))
+const icoBodyShape = new CANNON.Sphere(1)
 var icoBody = new CANNON.Body({
   mass: 1,
 })
@@ -121,8 +121,9 @@ window.addEventListener('resize', onWindowResize)
 
 // on click
 function printMousePos(event) {
-  console.log("clientX: " + event.clientX + " - clientY: " + event.clientY)
-  spinShape(event)
+  if (event.clientY > 80) {
+    spinShape(event)
+  }
 }
 document.addEventListener("click", printMousePos);
 
