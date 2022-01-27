@@ -1,10 +1,11 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js'
-import * as CANNON from '../node_modules/cannon/cannon-es.js'
-import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js'
+import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module.js' //'./three-module.js'
+import * as CANNON from 'https://cdn.skypack.dev/cannon-es@0.19.0' //'./cannon-es.js'
+import {OrbitControls} from  'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js'//'./OrbitControls.js'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
-camera.position.setX(-65)
+const orbitRadius = 70
+camera.position.setX(-1*orbitRadius)
 
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("#bg")
@@ -88,10 +89,20 @@ for (let i=0; i<200; i++) {
   addStar(starGeometry, starMaterial)
 }
 
+// camera orbit stuff
+let orbitAngle = 0
+const orbitSpeed = 0.002
 function orbitCamera() {
-  camera.position.x += 0.07*Math.sin(a)
-  camera.position.z += 0.07*Math.cos(a)
+  let multiplier = orbitRadius*orbitSpeed
+  camera.position.x += multiplier*Math.sin(orbitAngle)
+  camera.position.z += multiplier*Math.cos(orbitAngle)
   camera.lookAt([0, 0, 0])
+
+  if (orbitAngle==360) {
+    orbitAngle= 0
+  } else {
+    orbitAngle+= orbitSpeed
+  }
 }
 
 // when window is resized
@@ -107,33 +118,32 @@ window.addEventListener('resize', onWindowResize)
 // on click
 function printMousePos(event) {
   console.log("clientX: " + event.clientX + " - clientY: " + event.clientY)
+  spinShape(event)
+}
+document.addEventListener("click", printMousePos);
+
+// function to spin the shape on click by projecting a vector based on the camera angle and click position
+function spinShape(event) {
   const torqueFactor = 120
+  let xVec = (screenMidy - event.clientY) * Math.sin(orbitAngle)
   let yVec = screenMidx - event.clientX
-  let zVec = screenMidy - event.clientY
-  const mag = Math.sqrt(yVec*yVec + zVec*zVec)
+  let zVec = (screenMidy - event.clientY) * Math.cos(orbitAngle)
+  const mag = Math.sqrt(xVec*xVec + yVec*yVec + zVec*zVec)
+  xVec /= mag
   yVec /= mag
   zVec/= mag
 
-  const torque = new CANNON.Vec3(0, yVec*torqueFactor, zVec*torqueFactor)
+  const torque = new CANNON.Vec3(xVec*torqueFactor, yVec*torqueFactor, zVec*torqueFactor)
   icoBody.applyTorque(torque)
 }
 
-document.addEventListener("click", printMousePos);
-
 // main animation loop
-var a = 0
+
 function animate() {
   requestAnimationFrame(animate)
 
   //animations go here
-  orbitCamera()
-
-  if (a==360) {
-    a = 0
-  } else {
-    a += 0.001
-  }
-  
+  orbitCamera()  
   
   //update controls
   orbitControls.update()
