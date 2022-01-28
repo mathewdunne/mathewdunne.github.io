@@ -5,6 +5,8 @@ import {OrbitControls} from  'https://cdn.skypack.dev/three@0.136.0/examples/jsm
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
 const orbitRadius = 70
+let orbitAngle = 0
+const orbitSpeed = 0.002
 camera.position.setX(-1*orbitRadius)
 
 let clock = new THREE.Clock()
@@ -17,65 +19,74 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setSize(window.innerWidth, window.innerHeight)
-
-
 renderer.render(scene, camera)
 
-const backgroundTexture = new THREE.TextureLoader().load('../assets/img/space.jpg')
-scene.background = backgroundTexture
+initSpaceWorld();
 
-const world = new CANNON.World()
+function initSpaceWorld() {
+  const backgroundTexture = new THREE.TextureLoader().load('../assets/img/space.jpg')
+  scene.background = backgroundTexture
 
-let screenMidx = window.innerWidth/2
-let screenMidy = window.innerHeight/2
+  globalThis.world = new CANNON.World()
 
-// set up shape
-const icoGeometry = new THREE.IcosahedronGeometry(20, 0)
-const icoMaterial = new THREE.MeshStandardMaterial({color: 0x46d4a2})
-const ico = new THREE.Mesh(icoGeometry, icoMaterial)
-const icoBodyShape = new CANNON.Sphere(1)
-var icoBody = new CANNON.Body({
-  mass: 1,
-})
-icoBody.addShape(icoBodyShape)
-icoBody.angularDamping = 0.3
-scene.add(ico)
-world.addBody(icoBody)
+  globalThis.screenMidx = window.innerWidth/2
+  globalThis.screenMidy = window.innerHeight/2
 
-// set up point lighting
-const pointLightArray = Array()
-var positionFactor = 18
-var intensity = 0.8
+  // set up shape
+  const icoGeometry = new THREE.IcosahedronGeometry(20, 0)
+  const icoMaterial = new THREE.MeshStandardMaterial({color: 0x46d4a2})
+  globalThis.ico = new THREE.Mesh(icoGeometry, icoMaterial)
+  const icoBodyShape = new CANNON.Sphere(1)
+  globalThis.icoBody = new CANNON.Body({
+    mass: 1,
+  })
+  icoBody.addShape(icoBodyShape)
+  icoBody.angularDamping = 0.3
+  scene.add(ico)
+  world.addBody(icoBody)
 
-for (let i = 0; i < 8; i++) {
-  pointLightArray.push(new THREE.PointLight(0xfffff, intensity))
+  // set up point lighting
+  const pointLightArray = Array()
+  var positionFactor = 18
+  var intensity = 0.8
 
-  var xval = (i%8 > 3 ? 1 : -1)*positionFactor
-  var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
-  var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
+  for (let i = 0; i < 8; i++) {
+    pointLightArray.push(new THREE.PointLight(0xfffff, intensity))
 
-  pointLightArray[i].position.set(xval, yval, zval)
-  scene.add(pointLightArray[i])
+    var xval = (i%8 > 3 ? 1 : -1)*positionFactor
+    var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
+    var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
+
+    pointLightArray[i].position.set(xval, yval, zval)
+    scene.add(pointLightArray[i])
+  }
+
+  // // point light helpers
+  // const lightHelperArray = Array()
+  // for (let i = 0; i < pointLightArray.length; i++) {
+  //   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
+  //   scene.add(lightHelperArray[i])
+  // }
+
+  // //grid helper
+  // const gridHelper = new THREE.GridHelper(200, 50)
+  // scene.add(gridHelper)
+
+  // ambient light
+  const ambientLight = new THREE.AmbientLight(0xfffff, 0.4)
+  scene.add(ambientLight)
+
+  // orbit controls
+  globalThis.orbitControls = new OrbitControls(camera, renderer.domElement)
+  orbitControls.enableZoom = false;
+
+  const starGeometry = new THREE.SphereGeometry(0.25, 24, 24)
+  const starMaterial = new THREE.MeshStandardMaterial({color: 0xfffff})
+
+  for (let i=0; i<200; i++) {
+    addStar(starGeometry, starMaterial)
+  }
 }
-
-// // point light helpers
-// const lightHelperArray = Array()
-// for (let i = 0; i < pointLightArray.length; i++) {
-//   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
-//   scene.add(lightHelperArray[i])
-// }
-
-// //grid helper
-// const gridHelper = new THREE.GridHelper(200, 50)
-// scene.add(gridHelper)
-
-// ambient light
-const ambientLight = new THREE.AmbientLight(0xfffff, 0.4)
-scene.add(ambientLight)
-
-// orbit controls
-const orbitControls = new OrbitControls(camera, renderer.domElement)
-orbitControls.enableZoom = false;
 
 
 // add "stars"
@@ -86,16 +97,8 @@ function addStar(geometry, material) {
   star.position.set(x, y, z)
   scene.add(star)
 }
-const starGeometry = new THREE.SphereGeometry(0.25, 24, 24)
-const starMaterial = new THREE.MeshStandardMaterial({color: 0xfffff})
-
-for (let i=0; i<200; i++) {
-  addStar(starGeometry, starMaterial)
-}
 
 // camera orbit stuff
-let orbitAngle = 0
-const orbitSpeed = 0.002
 function orbitCamera() {
   let multiplier = orbitRadius*orbitSpeed
   camera.position.x += multiplier*Math.sin(orbitAngle)
