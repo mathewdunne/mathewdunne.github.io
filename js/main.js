@@ -13,7 +13,7 @@ camera.position.setX(-1*orbitRadius)
 
 let clock = new THREE.Clock()
 let delta = 0
-let fps = 60
+let fps = 30
 let interval = 1/fps
 
 const renderer = new THREE.WebGLRenderer({
@@ -97,6 +97,7 @@ function initBouncingBalls() {
   const backgroundTexture = new THREE.TextureLoader().load('')
   scene.background = backgroundTexture
   camera.position.x = -40
+  globalThis.ballSize = 2
 
   globalThis.world = new CANNON.World()
 
@@ -104,8 +105,8 @@ function initBouncingBalls() {
   globalThis.screenMidy = window.innerHeight/2
 
   // set up bounding box
-  const boxHeight = (-1*camera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
-  const boxWidth = boxHeight * window.innerWidth / window.innerHeight
+  globalThis.boxHeight = (-1*camera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
+  globalThis.boxWidth = boxHeight * window.innerWidth / window.innerHeight
 
   const wallGeometry = new THREE.BoxGeometry(1, boxHeight, 1)
   const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff})
@@ -157,18 +158,18 @@ function initBouncingBalls() {
   // set up point lighting
   const pointLightArray = Array()
   var positionFactor = 30
-  var intensity = 10
+  var intensity = 1
 
-  for (let i = 0; i < 8; i++) {
-    pointLightArray.push(new THREE.PointLight(0xfffff, intensity))
+  // for (let i = 0; i < 8; i++) {
+  //   pointLightArray.push(new THREE.PointLight(0xfffff, intensity))
 
-    var xval = (i%8 > 3 ? 1 : -1)*positionFactor
-    var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
-    var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
+  //   var xval = (i%8 > 3 ? 1 : -1)*positionFactor
+  //   var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
+  //   var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
 
-    pointLightArray[i].position.set(xval, yval, zval)
-    scene.add(pointLightArray[i])
-  }
+  //   pointLightArray[i].position.set(xval, yval, zval)
+  //   scene.add(pointLightArray[i])
+  // }
 
     // // point light helpers
     // const lightHelperArray = Array()
@@ -181,7 +182,7 @@ function initBouncingBalls() {
   globalThis.orbitControls = new OrbitControls(camera, renderer.domElement)
   orbitControls.enableZoom = false;
 
-  const ballGeometry = new THREE.SphereGeometry(1.5, 24, 24)
+  const ballGeometry = new THREE.SphereGeometry(ballSize, 24, 24)
   const ballMaterial = new THREE.MeshStandardMaterial({color: 0xff0000})
 
   globalThis.numOfBalls = 50
@@ -209,13 +210,20 @@ function addBalls(geometry, material, number) {
     const y = THREE.MathUtils.randFloatSpread(yRange)
     const z = THREE.MathUtils.randFloatSpread(zRange)
     
-    const ballBodyShape = new CANNON.Sphere(1.5)
+    const ballBodyShape = new CANNON.Sphere(ballSize)
     const ballBody = new CANNON.Body({mass: 1,})
     ballBody.addShape(ballBodyShape)
     ballBody.linarDamping = 0
+
+    let yVelocity = Math.random() * 2 - 1 // between -1 and 1
+    let zVelocity = Math.random() * 2 - 1 // between -1 and 1
+    const mag = Math.sqrt(yVelocity*yVelocity + zVelocity*zVelocity)
+    globalThis.speedFactor = 10
+    yVelocity /= (mag/speedFactor)
+    zVelocity /= (mag/speedFactor)
     
     ballBody.position = new CANNON.Vec3(0, y, z)
-    ballBody.velocity = new CANNON.Vec3(0, 10, 10)
+    ballBody.velocity = new CANNON.Vec3(0, yVelocity, zVelocity)
     
     scene.add(ballMesh)
     ballMeshes.push(ballMesh)
@@ -249,12 +257,17 @@ function onWindowResize() {
 window.addEventListener('resize', onWindowResize)
 
 // on click
-function printMousePos(event) {
+function onMouseClick(event) {
   if (event.clientY > 80) {
-    spinShape(event)
+    
+    switch (mode) {
+      case "SPACE": spinShape(event); break;
+      case "BALLS": ballForce(event); break;
+    }
+    
   }
 }
-document.addEventListener("click", printMousePos);
+document.addEventListener("click", onMouseClick);
 
 // function to spin the shape on click by projecting a vector based on the camera angle and click position
 function spinShape(event) {
@@ -269,6 +282,31 @@ function spinShape(event) {
 
   const torque = new CANNON.Vec3(xVec*torqueFactor, yVec*torqueFactor, zVec*torqueFactor)
   icoBody.applyTorque(torque)
+}
+
+// apply "explosion outwards" force to balls
+function ballForce(event) {
+  console.log("Start")
+  for (let i=0; i<numOfBalls; i++) {
+    const yBall = ballBodies[i].position.y
+    const yClick = -1 * (event.clientY*boxHeight/window.innerHeight - boxHeight/2)
+
+    const zBall = ballBodies[i].position.z
+    const zClick = event.clientX*boxWidth/window.innerWidth - boxWidth/2
+
+    let forceFactor = 500
+    let length = Math.sqrt(Math.pow(yBall-yClick, 2) + Math.pow(zBall-zClick, 2))
+    if (length<1) length = 1
+    forceFactor /= length
+
+    const forceVector = new CANNON.Vec3(0, forceFactor/(yBall-yClick), forceFactor/(zBall-zClick))
+
+    // let zVec = (ballBodies[i].position.z) - (event.clientX*boxWidth/window.innerWidth - boxWidth/2)
+    console.log(forceVector)
+
+    ballBodies[i].applyImpulse(forceVector)
+  }
+  
 }
 
 // on scroll
@@ -303,6 +341,15 @@ function animate() {
       ico.quaternion.copy(icoBody.quaternion)
     } else if (mode == "BALLS") {
       for (let i=0; i<numOfBalls; i++) {
+        let yV = ballBodies[i].velocity.y
+        let zV = ballBodies[i].velocity.z
+        const mag = Math.sqrt(yV*yV + zV*zV)
+
+        if (mag < speedFactor) {
+          ballBodies[i].velocity.y = yV/(mag/speedFactor)
+          ballBodies[i].velocity.z = zV/(mag/speedFactor)
+        }
+
         ballMeshes[i].position.copy(ballBodies[i].position)
         ballMeshes[i].quaternion.copy(ballBodies[i].quaternion)
       }
