@@ -2,8 +2,10 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module
 import * as CANNON from 'https://cdn.skypack.dev/cannon-es@0.19.0' //'./cannon-es.js'
 import {OrbitControls} from  'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js'//'./OrbitControls.js'
 
+let mode = "SPACE"
 const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
+const fov = 75
+const camera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
 const orbitRadius = 70
 let orbitAngle = 0
 const orbitSpeed = 0.002
@@ -21,7 +23,10 @@ renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.render(scene, camera)
 
-initSpaceWorld();
+switch (mode) {
+  case "SPACE": initSpaceWorld(); break;
+  case "BALLS": initBouncingBalls(); break;
+}
 
 function initSpaceWorld() {
   const backgroundTexture = new THREE.TextureLoader().load('../assets/img/space.jpg')
@@ -88,6 +93,102 @@ function initSpaceWorld() {
   }
 }
 
+function initBouncingBalls() {
+  const backgroundTexture = new THREE.TextureLoader().load('')
+  scene.background = backgroundTexture
+  camera.position.x = -40
+
+  globalThis.world = new CANNON.World()
+
+  globalThis.screenMidx = window.innerWidth/2
+  globalThis.screenMidy = window.innerHeight/2
+
+  // set up bounding box
+  const boxHeight = (-1*camera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
+  const boxWidth = boxHeight * window.innerWidth / window.innerHeight
+
+  const wallGeometry = new THREE.BoxGeometry(1, boxHeight, 1)
+  const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff})
+  const wallBodyShape = new CANNON.Box(new CANNON.Vec3(1, boxHeight, 1))
+
+  const roofGeometry = new THREE.BoxGeometry(1, 1, boxWidth)
+  const roofBodyShape = new CANNON.Box(new CANNON.Vec3(1, 1, boxWidth))
+  
+  // left wall
+  globalThis.leftWall = new THREE.Mesh(wallGeometry, wallMaterial)
+  globalThis.leftWallBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
+  leftWallBody.addShape(wallBodyShape)
+  leftWallBody.position = new CANNON.Vec3(0, 0, boxWidth/-2)
+  scene.add(leftWall)
+  world.addBody(leftWallBody)
+  leftWall.position.copy(leftWallBody.position)
+
+  // right wall
+  globalThis.rightWall = new THREE.Mesh(wallGeometry, wallMaterial)
+  globalThis.rightWallBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
+  rightWallBody.addShape(wallBodyShape)
+  rightWallBody.position = new CANNON.Vec3(0, 0, boxWidth/2)
+  scene.add(rightWall)
+  world.addBody(rightWallBody)
+  rightWall.position.copy(rightWallBody.position)
+
+  // roof
+  globalThis.roof = new THREE.Mesh(roofGeometry, wallMaterial)
+  globalThis.roofBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
+  roofBody.addShape(roofBodyShape)
+  roofBody.position = new CANNON.Vec3(0, boxHeight/2, 0)
+  scene.add(roof)
+  world.addBody(roofBody)
+  roof.position.copy(roofBody.position)
+
+  // floor
+  globalThis.floor = new THREE.Mesh(roofGeometry, wallMaterial)
+  globalThis.floorBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
+  floorBody.addShape(roofBodyShape)
+  floorBody.position = new CANNON.Vec3(0, boxHeight/-2, 0)
+  scene.add(floor)
+  world.addBody(floorBody)
+  floor.position.copy(floorBody.position)
+
+  // ambient light
+  const ambientLight = new THREE.AmbientLight(0xfffff, 100)
+  scene.add(ambientLight)
+
+  // set up point lighting
+  const pointLightArray = Array()
+  var positionFactor = 30
+  var intensity = 10
+
+  for (let i = 0; i < 8; i++) {
+    pointLightArray.push(new THREE.PointLight(0xfffff, intensity))
+
+    var xval = (i%8 > 3 ? 1 : -1)*positionFactor
+    var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
+    var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
+
+    pointLightArray[i].position.set(xval, yval, zval)
+    scene.add(pointLightArray[i])
+  }
+
+    // // point light helpers
+    // const lightHelperArray = Array()
+    // for (let i = 0; i < pointLightArray.length; i++) {
+    //   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
+    //   scene.add(lightHelperArray[i])
+    // }
+
+  // orbit controls
+  globalThis.orbitControls = new OrbitControls(camera, renderer.domElement)
+  orbitControls.enableZoom = false;
+
+  const ballGeometry = new THREE.SphereGeometry(1.5, 24, 24)
+  const ballMaterial = new THREE.MeshStandardMaterial({color: 0xff0000})
+
+  globalThis.numOfBalls = 50
+  globalThis.ballMeshes = []
+  globalThis.ballBodies = []
+  addBalls(ballGeometry, ballMaterial, numOfBalls);
+}
 
 // add "stars"
 function addStar(geometry, material) {
@@ -98,6 +199,31 @@ function addStar(geometry, material) {
   scene.add(star)
 }
 
+// add balls
+function addBalls(geometry, material, number) {
+  for (let i=0; i<number; i++) {
+    const ballMesh = new THREE.Mesh(geometry, material)
+
+    const yRange = (-1*camera.position.x) / Math.tan(Math.PI/180 * fov/2)
+    const zRange = yRange * window.innerWidth / window.innerHeight
+    const y = THREE.MathUtils.randFloatSpread(yRange)
+    const z = THREE.MathUtils.randFloatSpread(zRange)
+    
+    const ballBodyShape = new CANNON.Sphere(1.5)
+    const ballBody = new CANNON.Body({mass: 1,})
+    ballBody.addShape(ballBodyShape)
+    ballBody.linarDamping = 0
+    
+    ballBody.position = new CANNON.Vec3(0, y, z)
+    ballBody.velocity = new CANNON.Vec3(0, 10, 10)
+    
+    scene.add(ballMesh)
+    ballMeshes.push(ballMesh)
+    world.addBody(ballBody)
+    ballBodies.push(ballBody)
+  }
+}
+
 // camera orbit stuff
 function orbitCamera() {
   let multiplier = orbitRadius*orbitSpeed
@@ -105,7 +231,7 @@ function orbitCamera() {
   camera.position.z += multiplier*Math.cos(orbitAngle)
   camera.lookAt([0, 0, 0])
 
-  if (orbitAngle==360) {
+  if (orbitAngle==2*Math.PI) {
     orbitAngle= 0
   } else {
     orbitAngle += orbitSpeed
@@ -160,16 +286,28 @@ function animate() {
 
   if (delta > interval) {
     //animations go here
-    orbitCamera()  
+    if (mode == "SPACE") {
+      orbitCamera();
+    }
+     
     
     //update controls
     orbitControls.update()
 
     //update physics
     world.fixedStep()
+
     // Copy coordinates from cannon.js to three.js
-    ico.position.copy(icoBody.position)
-    ico.quaternion.copy(icoBody.quaternion)
+    if (mode == "SPACE") {
+      ico.position.copy(icoBody.position)
+      ico.quaternion.copy(icoBody.quaternion)
+    } else if (mode == "BALLS") {
+      for (let i=0; i<numOfBalls; i++) {
+        ballMeshes[i].position.copy(ballBodies[i].position)
+        ballMeshes[i].quaternion.copy(ballBodies[i].quaternion)
+      }
+    }
+    
 
 
     renderer.render(scene, camera)
