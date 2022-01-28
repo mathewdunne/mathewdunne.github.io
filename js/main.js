@@ -105,7 +105,7 @@ function orbitCamera() {
   if (orbitAngle==360) {
     orbitAngle= 0
   } else {
-    orbitAngle+= orbitSpeed
+    orbitAngle += orbitSpeed
   }
 }
 
