@@ -16,8 +16,40 @@ let delta = 0
 let fps = 30
 let interval = 1/fps
 
+
+
+// window.onload = function() {
+//   console.log("loaded")
+//   var canvas = document.getElementById("myCanvas");
+//   var ctx = canvas.getContext("2d");
+//   ctx.font = "30px Comic Sans MS";
+//   ctx.fillStyle = "red";
+//   ctx.textAlign = "center";
+//   ctx.fillText("Hello World", canvas.width/2, canvas.height/2);
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector("#bg")
+  canvas: document.querySelector("#mainCanvas")
 })
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -78,7 +110,7 @@ function initSpaceWorld() {
   // scene.add(gridHelper)
 
   // ambient light
-  const ambientLight = new THREE.AmbientLight(0xfffff, 0.4)
+  globalThis.ambientLight = new THREE.AmbientLight(0xfffff, 0.4)
   scene.add(ambientLight)
 
   // orbit controls
@@ -86,7 +118,7 @@ function initSpaceWorld() {
   orbitControls.enableZoom = false;
 
   const starGeometry = new THREE.SphereGeometry(0.25, 24, 24)
-  const starMaterial = new THREE.MeshStandardMaterial({color: 0xfffff})
+  const starMaterial = new THREE.MeshStandardMaterial({color: 0xFFFFFF})
 
   for (let i=0; i<200; i++) {
     addStar(starGeometry, starMaterial)
