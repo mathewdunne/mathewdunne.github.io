@@ -3,57 +3,33 @@ import * as CANNON from 'https://cdn.skypack.dev/cannon-es@0.19.0' //'./cannon-e
 import {OrbitControls} from  'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js'//'./OrbitControls.js'
 
 let mode = "SPACE"
-const scene = new THREE.Scene()
+window.onload = scrollDown();
+const spaceScene = new THREE.Scene()
+const ballScene = new THREE.Scene()
 const fov = 75
-const camera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
+const spaceCamera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
+const ballCamera = new THREE.PerspectiveCamera(fov, 1, 0.1, 1000)
 const orbitRadius = 70
 let orbitAngle = 0
 const orbitSpeed = 0.002
-camera.position.setX(-1*orbitRadius)
+spaceCamera.position.setX(-1*orbitRadius)
+ballCamera.position.setX(-40)
 
 let clock = new THREE.Clock()
 let delta = 0
 let fps = 30
 let interval = 1/fps
 
-
-
-// window.onload = function() {
-//   console.log("loaded")
-//   var canvas = document.getElementById("myCanvas");
-//   var ctx = canvas.getContext("2d");
-//   ctx.font = "30px Comic Sans MS";
-//   ctx.fillStyle = "red";
-//   ctx.textAlign = "center";
-//   ctx.fillText("Hello World", canvas.width/2, canvas.height/2);
-// };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const renderer = new THREE.WebGLRenderer({
+const spaceRenderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("#mainCanvas")
 })
-renderer.setPixelRatio(window.devicePixelRatio)
-renderer.setSize(window.innerWidth, window.innerHeight)
-renderer.render(scene, camera)
+spaceRenderer.setPixelRatio(window.devicePixelRatio)
+spaceRenderer.setSize(window.innerWidth, window.innerHeight)
+spaceRenderer.render(spaceScene, spaceCamera)
+const ballRenderer = new THREE.WebGLRenderer({
+  canvas: document.querySelector("#myCanvas")
+})
+ballRenderer.render(ballScene, ballCamera)
 
 switch (mode) {
   case "SPACE": initSpaceWorld(); break;
@@ -62,7 +38,7 @@ switch (mode) {
 
 function initSpaceWorld() {
   const backgroundTexture = new THREE.TextureLoader().load('../assets/img/space.jpg')
-  scene.background = backgroundTexture
+  spaceScene.background = backgroundTexture
 
   globalThis.world = new CANNON.World()
 
@@ -79,7 +55,7 @@ function initSpaceWorld() {
   })
   icoBody.addShape(icoBodyShape)
   icoBody.angularDamping = 0.3
-  scene.add(ico)
+  spaceScene.add(ico)
   world.addBody(icoBody)
 
   // set up point lighting
@@ -95,26 +71,26 @@ function initSpaceWorld() {
     var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
 
     pointLightArray[i].position.set(xval, yval, zval)
-    scene.add(pointLightArray[i])
+    spaceScene.add(pointLightArray[i])
   }
 
   // // point light helpers
   // const lightHelperArray = Array()
   // for (let i = 0; i < pointLightArray.length; i++) {
   //   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
-  //   scene.add(lightHelperArray[i])
+  //   spaceScene.add(lightHelperArray[i])
   // }
 
   // //grid helper
   // const gridHelper = new THREE.GridHelper(200, 50)
-  // scene.add(gridHelper)
+  // spaceScene.add(gridHelper)
 
   // ambient light
   globalThis.ambientLight = new THREE.AmbientLight(0xfffff, 0.4)
-  scene.add(ambientLight)
+  spaceScene.add(ambientLight)
 
   // orbit controls
-  globalThis.orbitControls = new OrbitControls(camera, renderer.domElement)
+  globalThis.orbitControls = new OrbitControls(spaceCamera, spaceRenderer.domElement)
   orbitControls.enableZoom = false;
 
   const starGeometry = new THREE.SphereGeometry(0.25, 24, 24)
@@ -126,9 +102,6 @@ function initSpaceWorld() {
 }
 
 function initBouncingBalls() {
-  const backgroundTexture = new THREE.TextureLoader().load('')
-  scene.background = backgroundTexture
-  camera.position.x = -40
   globalThis.ballSize = 2
 
   globalThis.world = new CANNON.World()
@@ -137,7 +110,7 @@ function initBouncingBalls() {
   globalThis.screenMidy = window.innerHeight/2
 
   // set up bounding box
-  globalThis.boxHeight = (-1*camera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
+  globalThis.boxHeight = (-1*spaceCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
   globalThis.boxWidth = boxHeight * window.innerWidth / window.innerHeight
 
   const wallGeometry = new THREE.BoxGeometry(1, boxHeight, 1)
@@ -152,7 +125,7 @@ function initBouncingBalls() {
   globalThis.leftWallBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
   leftWallBody.addShape(wallBodyShape)
   leftWallBody.position = new CANNON.Vec3(0, 0, boxWidth/-2)
-  scene.add(leftWall)
+  ballScene.add(leftWall)
   world.addBody(leftWallBody)
   leftWall.position.copy(leftWallBody.position)
 
@@ -161,7 +134,7 @@ function initBouncingBalls() {
   globalThis.rightWallBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
   rightWallBody.addShape(wallBodyShape)
   rightWallBody.position = new CANNON.Vec3(0, 0, boxWidth/2)
-  scene.add(rightWall)
+  ballScene.add(rightWall)
   world.addBody(rightWallBody)
   rightWall.position.copy(rightWallBody.position)
 
@@ -170,7 +143,7 @@ function initBouncingBalls() {
   globalThis.roofBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
   roofBody.addShape(roofBodyShape)
   roofBody.position = new CANNON.Vec3(0, boxHeight/2, 0)
-  scene.add(roof)
+  ballScene.add(roof)
   world.addBody(roofBody)
   roof.position.copy(roofBody.position)
 
@@ -179,13 +152,13 @@ function initBouncingBalls() {
   globalThis.floorBody = new CANNON.Body({type: CANNON.Body.KINEMATIC})
   floorBody.addShape(roofBodyShape)
   floorBody.position = new CANNON.Vec3(0, boxHeight/-2, 0)
-  scene.add(floor)
+  ballScene.add(floor)
   world.addBody(floorBody)
   floor.position.copy(floorBody.position)
 
   // ambient light
   const ambientLight = new THREE.AmbientLight(0xfffff, 100)
-  scene.add(ambientLight)
+  ballScene.add(ambientLight)
 
   // set up point lighting
   const pointLightArray = Array()
@@ -200,18 +173,18 @@ function initBouncingBalls() {
   //   var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
 
   //   pointLightArray[i].position.set(xval, yval, zval)
-  //   scene.add(pointLightArray[i])
+  //   spaceScene.add(pointLightArray[i])
   // }
 
     // // point light helpers
     // const lightHelperArray = Array()
     // for (let i = 0; i < pointLightArray.length; i++) {
     //   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
-    //   scene.add(lightHelperArray[i])
+    //   spaceScene.add(lightHelperArray[i])
     // }
 
   // orbit controls
-  globalThis.orbitControls = new OrbitControls(camera, renderer.domElement)
+  globalThis.orbitControls = new OrbitControls(spaceCamera, spaceRenderer.domElement)
   orbitControls.enableZoom = false;
 
   const ballGeometry = new THREE.SphereGeometry(ballSize, 24, 24)
@@ -229,7 +202,7 @@ function addStar(geometry, material) {
 
   const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100))
   star.position.set(x, y, z)
-  scene.add(star)
+  spaceScene.add(star)
 }
 
 // add balls
@@ -237,7 +210,7 @@ function addBalls(geometry, material, number) {
   for (let i=0; i<number; i++) {
     const ballMesh = new THREE.Mesh(geometry, material)
 
-    const yRange = (-1*camera.position.x) / Math.tan(Math.PI/180 * fov/2)
+    const yRange = (-1*spaceCamera.position.x) / Math.tan(Math.PI/180 * fov/2)
     const zRange = yRange * window.innerWidth / window.innerHeight
     const y = THREE.MathUtils.randFloatSpread(yRange)
     const z = THREE.MathUtils.randFloatSpread(zRange)
@@ -257,19 +230,19 @@ function addBalls(geometry, material, number) {
     ballBody.position = new CANNON.Vec3(0, y, z)
     ballBody.velocity = new CANNON.Vec3(0, yVelocity, zVelocity)
     
-    scene.add(ballMesh)
+    ballScene.add(ballMesh)
     ballMeshes.push(ballMesh)
     world.addBody(ballBody)
     ballBodies.push(ballBody)
   }
 }
 
-// camera orbit stuff
+// spaceCamera orbit stuff
 function orbitCamera() {
   let multiplier = orbitRadius*orbitSpeed
-  camera.position.x += multiplier*Math.sin(orbitAngle)
-  camera.position.z += multiplier*Math.cos(orbitAngle)
-  camera.lookAt([0, 0, 0])
+  spaceCamera.position.x += multiplier*Math.sin(orbitAngle)
+  spaceCamera.position.z += multiplier*Math.cos(orbitAngle)
+  spaceCamera.lookAt([0, 0, 0])
 
   if (orbitAngle==2*Math.PI) {
     orbitAngle= 0
@@ -280,17 +253,37 @@ function orbitCamera() {
 
 // when window is resized
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  spaceCamera.aspect = window.innerWidth / window.innerHeight
+  spaceCamera.updateProjectionMatrix()
+  spaceRenderer.setSize(window.innerWidth, window.innerHeight)
   screenMidx = window.innerWidth/2
   screenMidy = window.innerHeight/2
 }
 window.addEventListener('resize', onWindowResize)
 
+function findElementPos(obj){
+  var curLeft = 0;
+  var curTop = 0;
+
+  if (obj.offsetParent) {
+     do {
+        curLeft += obj.offsetLeft;
+        curTop += obj.offsetTop;
+     } while (obj = obj.offsetParent);
+
+     return {X:curLeft,Y:curTop};
+  }
+}
+
 // on click
 function onMouseClick(event) {
-  if (event.clientY > 80) {
+  let inDeadZone = false
+  let buttonPos = findElementPos(document.getElementById("aboutButton"))
+
+  if (event.clientY < 80) {inDeadZone = true}
+  else if (event.clientX > buttonPos["X"] && event.clientX < buttonPos["X"]+133 && event.clientY > buttonPos["Y"] && event.clientY < buttonPos["Y"]+38) {inDeadZone = true}
+  
+  if (!inDeadZone) {
     
     switch (mode) {
       case "SPACE": spinShape(event); break;
@@ -301,7 +294,7 @@ function onMouseClick(event) {
 }
 document.addEventListener("click", onMouseClick);
 
-// function to spin the shape on click by projecting a vector based on the camera angle and click position
+// function to spin the shape on click by projecting a vector based on the spaceCamera angle and click position
 function spinShape(event) {
   const torqueFactor = 120
   let xVec = (screenMidy - event.clientY) * Math.sin(orbitAngle)
@@ -343,9 +336,15 @@ function ballForce(event) {
 
 // on scroll
 function scrollDown() {
-  const x = document.body.getBoundingClientRect().top
-  console.log(x)
-  ambientLight.intensity =0.4 + x*0.001
+  let scrollPosition = document.body.getBoundingClientRect().top
+
+  var alphaFactor = (Math.max(1 - ((scrollPosition * 100 / window.innerHeight) / 100), 0) - 1)*1.2;
+
+  const root = document.documentElement
+  root.style.setProperty('--alpha1', 0.6 + alphaFactor)
+  root.style.setProperty('--alpha2', 0.1 + alphaFactor)
+  root.style.setProperty('--alpha3', 1 + alphaFactor)
+
 }
 document.body.onscroll = scrollDown;
 
@@ -371,7 +370,7 @@ function animate() {
     if (mode == "SPACE") {
       ico.position.copy(icoBody.position)
       ico.quaternion.copy(icoBody.quaternion)
-    } else if (mode == "BALLS") {
+    } else {
       for (let i=0; i<numOfBalls; i++) {
         let yV = ballBodies[i].velocity.y
         let zV = ballBodies[i].velocity.z
@@ -388,8 +387,13 @@ function animate() {
     }
     
 
-
-    renderer.render(scene, camera)
+    if (mode == "SPACE") {
+      spaceRenderer.render(spaceScene, spaceCamera)
+    }
+    else {
+      ballRenderer.render(ballScene, ballCamera)
+    }
+    
     delta = delta % interval
   } 
 }
