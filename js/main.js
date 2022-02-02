@@ -9,6 +9,7 @@ const ballScene = new THREE.Scene()
 const fov = 75
 const spaceCamera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
 const ballCamera = new THREE.PerspectiveCamera(fov, 1, 0.1, 1000)
+ballCamera.lookAt(1, 0, 0)
 const orbitRadius = 70
 let orbitAngle = 0
 const orbitSpeed = 0.002
@@ -31,16 +32,18 @@ const ballRenderer = new THREE.WebGLRenderer({
 })
 ballRenderer.render(ballScene, ballCamera)
 
-switch (mode) {
-  case "SPACE": initSpaceWorld(); break;
-  case "BALLS": initBouncingBalls(); break;
-}
+// switch (mode) {
+//   case "SPACE": initSpaceWorld(); break;
+//   case "BALLS": initBouncingBalls(); break;
+// }
+initSpaceWorld()
+initBouncingBalls()
 
 function initSpaceWorld() {
   const backgroundTexture = new THREE.TextureLoader().load('../assets/img/space.jpg')
   spaceScene.background = backgroundTexture
 
-  globalThis.world = new CANNON.World()
+  globalThis.spaceWorld = new CANNON.World()
 
   globalThis.screenMidx = window.innerWidth/2
   globalThis.screenMidy = window.innerHeight/2
@@ -56,7 +59,7 @@ function initSpaceWorld() {
   icoBody.addShape(icoBodyShape)
   icoBody.angularDamping = 0.3
   spaceScene.add(ico)
-  world.addBody(icoBody)
+  spaceWorld.addBody(icoBody)
 
   // set up point lighting
   const pointLightArray = Array()
@@ -104,14 +107,16 @@ function initSpaceWorld() {
 function initBouncingBalls() {
   globalThis.ballSize = 2
 
-  globalThis.world = new CANNON.World()
+  globalThis.ballWorld = new CANNON.World()
 
   globalThis.screenMidx = window.innerWidth/2
   globalThis.screenMidy = window.innerHeight/2
 
   // set up bounding box
-  globalThis.boxHeight = (-1*spaceCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
-  globalThis.boxWidth = boxHeight * window.innerWidth / window.innerHeight
+  // globalThis.boxHeight = (-1*spaceCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
+  // globalThis.boxWidth = boxHeight * window.innerWidth / window.innerHeight
+  globalThis.boxHeight = 60
+  globalThis.boxWidth = 60
 
   const wallGeometry = new THREE.BoxGeometry(1, boxHeight, 1)
   const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff})
@@ -126,7 +131,7 @@ function initBouncingBalls() {
   leftWallBody.addShape(wallBodyShape)
   leftWallBody.position = new CANNON.Vec3(0, 0, boxWidth/-2)
   ballScene.add(leftWall)
-  world.addBody(leftWallBody)
+  ballWorld.addBody(leftWallBody)
   leftWall.position.copy(leftWallBody.position)
 
   // right wall
@@ -135,7 +140,7 @@ function initBouncingBalls() {
   rightWallBody.addShape(wallBodyShape)
   rightWallBody.position = new CANNON.Vec3(0, 0, boxWidth/2)
   ballScene.add(rightWall)
-  world.addBody(rightWallBody)
+  ballWorld.addBody(rightWallBody)
   rightWall.position.copy(rightWallBody.position)
 
   // roof
@@ -144,7 +149,7 @@ function initBouncingBalls() {
   roofBody.addShape(roofBodyShape)
   roofBody.position = new CANNON.Vec3(0, boxHeight/2, 0)
   ballScene.add(roof)
-  world.addBody(roofBody)
+  ballWorld.addBody(roofBody)
   roof.position.copy(roofBody.position)
 
   // floor
@@ -153,7 +158,7 @@ function initBouncingBalls() {
   floorBody.addShape(roofBodyShape)
   floorBody.position = new CANNON.Vec3(0, boxHeight/-2, 0)
   ballScene.add(floor)
-  world.addBody(floorBody)
+  ballWorld.addBody(floorBody)
   floor.position.copy(floorBody.position)
 
   // ambient light
@@ -232,7 +237,7 @@ function addBalls(geometry, material, number) {
     
     ballScene.add(ballMesh)
     ballMeshes.push(ballMesh)
-    world.addBody(ballBody)
+    ballWorld.addBody(ballBody)
     ballBodies.push(ballBody)
   }
 }
@@ -327,7 +332,7 @@ function ballForce(event) {
     const forceVector = new CANNON.Vec3(0, forceFactor/(yBall-yClick), forceFactor/(zBall-zClick))
 
     // let zVec = (ballBodies[i].position.z) - (event.clientX*boxWidth/window.innerWidth - boxWidth/2)
-    console.log(forceVector)
+    //console.log(forceVector)
 
     ballBodies[i].applyImpulse(forceVector)
   }
@@ -344,7 +349,6 @@ function scrollDown() {
   root.style.setProperty('--alpha1', 0.6 + alphaFactor)
   root.style.setProperty('--alpha2', 0.1 + alphaFactor)
   root.style.setProperty('--alpha3', 1 + alphaFactor)
-
 }
 document.body.onscroll = scrollDown;
 
@@ -364,7 +368,8 @@ function animate() {
     orbitControls.update()
 
     //update physics
-    world.fixedStep()
+    spaceWorld.fixedStep()
+    ballWorld.fixedStep()
 
     // Copy coordinates from cannon.js to three.js
     if (mode == "SPACE") {
