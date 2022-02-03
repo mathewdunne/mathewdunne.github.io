@@ -39,7 +39,6 @@
       <div class="d-flex justify-content-center">
         <div class="text-center">
           <h1 class="mx-auto mt-5 pt-5 text-uppercase">Mathew Dunne</h1>
-          <h2 class="text-white mx-auto mt-2 mb-2">This is an interactive website made by Mathew Dunne.</h2>
           <h2 class="text-white mx-auto mt-2 mb-5">Click anywhere to spin the shape!</h2>
           <a class="btn btn-info mb-5" id="aboutButton" href="#about">About Me<br></a>
           <h3 class="text-white py-5 bounce"><i class="bi bi-arrow-down-circle"></i></h3>
@@ -50,14 +49,22 @@
 
     <div class="masthead2">
       <div class="container-fluid">
-        <div class="row text-white text-center" id="about">
+        <div class="row text-white text-center pb-3 page2" id="about">
           <h1>About Me</h1>
         </div>
-        <div class="row text-white text-center py-4 px-5 mx-5">
+        <div class="row text-white text-center py-4 px-5 mx-5 page2">
           <div class="col-xl-6 pl-5">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Accusantium exercitationem veritatis amet maiores harum, delectus nemo labore inventore assumenda debitis beatae aliquid rerum omnis excepturi et eveniet? Nobis, neque praesentium?        </div>
+            <h3>
+              Hi, my name is Mathew Dunne! <br><br>
+              I made this website using Javascript.
+              The graphics and interactive elements were made using Three.js and cannon-es.
+            </h3>
+            <div class="pt-5 mt-5">
+              <h5>Click inside the box to make the balls move!</h5>
+            </div> 
+          </div>
           <div class="col-xl-6 pr-5">
-            <canvas class="canvas-small" height="200px" id="myCanvas" style="border:2px solid #FFFFFF"></canvas>
+            <canvas class="canvas-small" height="200px" id="ballCanvas" style="border:2px solid #FFFFFF;"></canvas>
           </div>
         </div>
       </div>

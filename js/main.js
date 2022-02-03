@@ -2,8 +2,8 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module
 import * as CANNON from 'https://cdn.skypack.dev/cannon-es@0.19.0' //'./cannon-es.js'
 import {OrbitControls} from  'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js'//'./OrbitControls.js'
 
-let mode = "BALLS"
-window.onload = scrollDown();
+window.onload = initMode(), scrollDown();
+function initMode() {globalThis.mode = ""}
 const fov = 75
 
 let clock = new THREE.Clock()
@@ -95,18 +95,18 @@ function initSpaceWorld() {
 }
 
 function initBouncingBalls() {
-  globalThis.ballSize = 2
-  let canWidth = document.getElementById("myCanvas").clientWidth;
-  let canHeight = document.getElementById("myCanvas").clientHeight;
+  globalThis.ballSize = 3
+  globalThis.canvWidth = document.getElementById("ballCanvas").clientWidth;
+  globalThis.canvHeight = document.getElementById("ballCanvas").clientHeight;
 
   globalThis.ballScene = new THREE.Scene()
-  globalThis.ballCamera = new THREE.PerspectiveCamera(fov, canWidth/canHeight, 0.1, 1000)
+  globalThis.ballCamera = new THREE.PerspectiveCamera(fov, canvWidth/canvHeight, 0.1, 1000)
   ballCamera.position.setX(-40)
   ballCamera.lookAt(1, 0, 0)
 
 
   globalThis.ballRenderer = new THREE.WebGLRenderer({
-    canvas: document.querySelector("#myCanvas")
+    canvas: document.querySelector("#ballCanvas")
   })
   ballRenderer.setPixelRatio(window.devicePixelRatio*10)
   ballRenderer.render(ballScene, ballCamera)
@@ -114,11 +114,8 @@ function initBouncingBalls() {
   globalThis.ballWorld = new CANNON.World()
 
   // set up bounding box
-  globalThis.boxHeight = (-1*ballCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.18
-  console.log(boxHeight)
-  globalThis.boxWidth = boxHeight * canWidth/canHeight
-  console.log("Canvas Width = " + String(canWidth))
-  console.log("Canvas Height = " + String(canHeight))
+  globalThis.boxHeight = (-1*ballCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.16
+  globalThis.boxWidth = boxHeight * canvWidth/canvHeight
 
   const wallGeometry = new THREE.BoxGeometry(1, boxHeight, 1)
   const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff})
@@ -183,12 +180,12 @@ function initBouncingBalls() {
     ballScene.add(pointLightArray[i])
   }
 
-    // point light helpers
-    const lightHelperArray = Array()
-    for (let i = 0; i < pointLightArray.length; i++) {
-      lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
-      ballScene.add(lightHelperArray[i])
-    }
+    // // point light helpers
+    // const lightHelperArray = Array()
+    // for (let i = 0; i < pointLightArray.length; i++) {
+    //   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
+    //   ballScene.add(lightHelperArray[i])
+    // }
 
   // orbit controls
   globalThis.orbitControls = new OrbitControls(spaceCamera, spaceRenderer.domElement)
@@ -217,8 +214,8 @@ function addBalls(geometry, material, number) {
   for (let i=0; i<number; i++) {
     const ballMesh = new THREE.Mesh(geometry, material)
 
-    const yRange = (-1*spaceCamera.position.x) / Math.tan(Math.PI/180 * fov/2)
-    const zRange = yRange * window.innerWidth / window.innerHeight
+    const yRange = boxHeight
+    const zRange = boxWidth
     const y = THREE.MathUtils.randFloatSpread(yRange)
     const z = THREE.MathUtils.randFloatSpread(zRange)
     
@@ -265,6 +262,10 @@ function onWindowResize() {
   spaceRenderer.setSize(window.innerWidth, window.innerHeight)
   screenMidx = window.innerWidth/2
   screenMidy = window.innerHeight/2
+
+  globalThis.canvWidth = document.getElementById("ballCanvas").clientWidth;
+  globalThis.canvHeight = document.getElementById("ballCanvas").clientHeight;
+  ballCamera.updateProjectionMatrix()
 }
 window.addEventListener('resize', onWindowResize)
 
@@ -318,25 +319,32 @@ function spinShape(event) {
 
 // apply "explosion outwards" force to balls
 function ballForce(event) {
-  console.log("Start")
-  for (let i=0; i<numOfBalls; i++) {
-    const yBall = ballBodies[i].position.y
-    const yClick = -1 * (event.clientY*boxHeight/window.innerHeight - boxHeight/2)
+  const canvPos = findElementPos(document.getElementById("ballCanvas"))
+  canvPos['Y'] -= window.innerHeight // because height is absolute from the top of the main page
+  const canvMidY = (canvPos['Y']) + canvHeight/2
+  const canvMidZ = canvPos['X'] + canvWidth/2
 
-    const zBall = ballBodies[i].position.z
-    const zClick = event.clientX*boxWidth/window.innerWidth - boxWidth/2
+  const yClick = -1 * ((event.clientY-canvMidY)*boxHeight/canvHeight)
+  const zClick = (event.clientX-canvMidZ)*boxWidth/canvWidth
 
-    let forceFactor = 500
-    let length = Math.sqrt(Math.pow(yBall-yClick, 2) + Math.pow(zBall-zClick, 2))
-    if (length<1) length = 1
-    forceFactor /= length
-
-    const forceVector = new CANNON.Vec3(0, forceFactor/(yBall-yClick), forceFactor/(zBall-zClick))
-
-    // let zVec = (ballBodies[i].position.z) - (event.clientX*boxWidth/window.innerWidth - boxWidth/2)
-    //console.log(forceVector)
-
-    ballBodies[i].applyImpulse(forceVector)
+  // if click is in box
+  if (Math.abs(yClick) < boxHeight/2 && Math.abs(zClick) < boxWidth/2) {
+    for (let i=0; i<numOfBalls; i++) {
+  
+      const yBall = ballBodies[i].position.y
+      
+      const zBall = ballBodies[i].position.z
+      // console.log("Z Ball: "+zBall)
+  
+      let forceFactor = 200
+      let length = Math.sqrt(Math.pow(yBall-yClick, 2) + Math.pow(zBall-zClick, 2))
+      if (length<5) length = 5
+      forceFactor /= length
+  
+      const forceVector = new CANNON.Vec3(0, forceFactor/(yBall-yClick), forceFactor/(zBall-zClick))
+  
+      ballBodies[i].applyImpulse(forceVector)
+    }
   }
   
 }
@@ -346,11 +354,20 @@ function scrollDown() {
   let scrollPosition = document.body.getBoundingClientRect().top
 
   var alphaFactor = (Math.max(1 - ((scrollPosition * 100 / window.innerHeight) / 100), 0) - 1)*1.2;
+  var ballCanvasOpacity = Math.max(-1*scrollPosition - window.innerHeight/1.3, 0)
+  ballCanvasOpacity /= (window.innerHeight*(1-1/1.3))
 
   const root = document.documentElement
   root.style.setProperty('--alpha1', 0.6 + alphaFactor)
   root.style.setProperty('--alpha2', 0.1 + alphaFactor)
   root.style.setProperty('--alpha3', 1 + alphaFactor)
+  root.style.setProperty('--ballCanvasOpacity', ballCanvasOpacity)
+
+  if (scrollPosition > window.innerHeight/-1.3) {
+    mode = "SPACE"
+  } else {
+    mode = "BALLS"
+  }
 }
 document.body.onscroll = scrollDown;
 
@@ -364,6 +381,7 @@ function animate() {
     if (mode == "SPACE") {
       orbitCamera();
     }
+    console.log(mode)
      
     
     //update controls
