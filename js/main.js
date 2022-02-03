@@ -2,44 +2,34 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module
 import * as CANNON from 'https://cdn.skypack.dev/cannon-es@0.19.0' //'./cannon-es.js'
 import {OrbitControls} from  'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js'//'./OrbitControls.js'
 
-let mode = "SPACE"
+let mode = "BALLS"
 window.onload = scrollDown();
-const spaceScene = new THREE.Scene()
-const ballScene = new THREE.Scene()
 const fov = 75
-const spaceCamera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
-const ballCamera = new THREE.PerspectiveCamera(fov, 1, 0.1, 1000)
-ballCamera.lookAt(1, 0, 0)
-const orbitRadius = 70
-let orbitAngle = 0
-const orbitSpeed = 0.002
-spaceCamera.position.setX(-1*orbitRadius)
-ballCamera.position.setX(-40)
 
 let clock = new THREE.Clock()
 let delta = 0
 let fps = 30
 let interval = 1/fps
 
-const spaceRenderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector("#mainCanvas")
-})
-spaceRenderer.setPixelRatio(window.devicePixelRatio)
-spaceRenderer.setSize(window.innerWidth, window.innerHeight)
-spaceRenderer.render(spaceScene, spaceCamera)
-const ballRenderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector("#myCanvas")
-})
-ballRenderer.render(ballScene, ballCamera)
-
-// switch (mode) {
-//   case "SPACE": initSpaceWorld(); break;
-//   case "BALLS": initBouncingBalls(); break;
-// }
 initSpaceWorld()
 initBouncingBalls()
 
 function initSpaceWorld() {
+  globalThis.spaceScene = new THREE.Scene()
+  globalThis.spaceCamera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
+  
+  globalThis.orbitRadius = 70
+  globalThis.orbitAngle = 0  
+  globalThis.orbitSpeed = 0.002
+  spaceCamera.position.setX(-1*orbitRadius)
+
+  globalThis.spaceRenderer = new THREE.WebGLRenderer({
+    canvas: document.querySelector("#mainCanvas")
+  })
+  spaceRenderer.setPixelRatio(window.devicePixelRatio)
+  spaceRenderer.setSize(window.innerWidth, window.innerHeight)
+  spaceRenderer.render(spaceScene, spaceCamera)
+  
   const backgroundTexture = new THREE.TextureLoader().load('../assets/img/space.jpg')
   spaceScene.background = backgroundTexture
 
@@ -106,17 +96,29 @@ function initSpaceWorld() {
 
 function initBouncingBalls() {
   globalThis.ballSize = 2
+  let canWidth = document.getElementById("myCanvas").clientWidth;
+  let canHeight = document.getElementById("myCanvas").clientHeight;
+
+  globalThis.ballScene = new THREE.Scene()
+  globalThis.ballCamera = new THREE.PerspectiveCamera(fov, canWidth/canHeight, 0.1, 1000)
+  ballCamera.position.setX(-40)
+  ballCamera.lookAt(1, 0, 0)
+
+
+  globalThis.ballRenderer = new THREE.WebGLRenderer({
+    canvas: document.querySelector("#myCanvas")
+  })
+  ballRenderer.setPixelRatio(window.devicePixelRatio*10)
+  ballRenderer.render(ballScene, ballCamera)
 
   globalThis.ballWorld = new CANNON.World()
 
-  globalThis.screenMidx = window.innerWidth/2
-  globalThis.screenMidy = window.innerHeight/2
-
   // set up bounding box
-  // globalThis.boxHeight = (-1*spaceCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.1
-  // globalThis.boxWidth = boxHeight * window.innerWidth / window.innerHeight
-  globalThis.boxHeight = 60
-  globalThis.boxWidth = 60
+  globalThis.boxHeight = (-1*ballCamera.position.x) / Math.tan(Math.PI/180 * fov/2)*1.18
+  console.log(boxHeight)
+  globalThis.boxWidth = boxHeight * canWidth/canHeight
+  console.log("Canvas Width = " + String(canWidth))
+  console.log("Canvas Height = " + String(canHeight))
 
   const wallGeometry = new THREE.BoxGeometry(1, boxHeight, 1)
   const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff})
@@ -162,37 +164,37 @@ function initBouncingBalls() {
   floor.position.copy(floorBody.position)
 
   // ambient light
-  const ambientLight = new THREE.AmbientLight(0xfffff, 100)
+  const ambientLight = new THREE.AmbientLight(0xfffff, 1)
   ballScene.add(ambientLight)
 
   // set up point lighting
   const pointLightArray = Array()
-  var positionFactor = 30
-  var intensity = 1
+  var positionFactor = 20
+  var intensity = 4
 
-  // for (let i = 0; i < 8; i++) {
-  //   pointLightArray.push(new THREE.PointLight(0xfffff, intensity))
+  for (let i = 0; i < 4; i++) {
+    pointLightArray.push(new THREE.PointLight(0xffffff, intensity))
 
-  //   var xval = (i%8 > 3 ? 1 : -1)*positionFactor
-  //   var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
-  //   var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
+    var xval = (-10)*positionFactor
+    var yval = (i%4 > 1 == 0 ? 1 : -1)*positionFactor
+    var zval = (i%2 > 0 == 0 ? 1 : -1)*positionFactor
 
-  //   pointLightArray[i].position.set(xval, yval, zval)
-  //   spaceScene.add(pointLightArray[i])
-  // }
+    pointLightArray[i].position.set(xval, yval, zval)
+    ballScene.add(pointLightArray[i])
+  }
 
-    // // point light helpers
-    // const lightHelperArray = Array()
-    // for (let i = 0; i < pointLightArray.length; i++) {
-    //   lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
-    //   spaceScene.add(lightHelperArray[i])
-    // }
+    // point light helpers
+    const lightHelperArray = Array()
+    for (let i = 0; i < pointLightArray.length; i++) {
+      lightHelperArray.push(new THREE.PointLightHelper(pointLightArray[i]))
+      ballScene.add(lightHelperArray[i])
+    }
 
   // orbit controls
   globalThis.orbitControls = new OrbitControls(spaceCamera, spaceRenderer.domElement)
   orbitControls.enableZoom = false;
 
-  const ballGeometry = new THREE.SphereGeometry(ballSize, 24, 24)
+  const ballGeometry = new THREE.SphereGeometry(ballSize, 48, 48)
   const ballMaterial = new THREE.MeshStandardMaterial({color: 0xff0000})
 
   globalThis.numOfBalls = 50
