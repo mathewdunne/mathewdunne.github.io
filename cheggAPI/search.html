@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Chegg Test</title>
+        <link href="{{ url_for('static', filename='css/bootstrap_5.2.1.min.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons_1.9.1.min.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+      </head>
+<body onload="execOnLoad()">
+    <div class="containter-fluid mx-2">
+        
+        <div class="row my-4">
+            <div class="text-center">
+                <h1>Chegg Bot Test</h1>
+            </div>
+        </div>
+
+        <div id="inputView">
+            <div class="d-flex justify-content-center" id="inputView">
+                <form id="input-form">
+                    <label>Enter a URL:</label>
+                    <input class="form-control my-1" id="cheggLink" type="text" style="min-width: 500px">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="loadingView">
+            <div class="container" id="loading">
+                <div class="row text-center">
+                    <h3>Getting result...</h3>
+                </div>
+                <div class="row my-5">
+                    <img class="mx-auto d-block" src="https://i.stack.imgur.com/MnyxU.gif" style="display: block; max-height: 10rem; width: auto;">
+                </div>
+            </div>
+        </div>
+
+    <div>
+
+    <script>
+        const form = document.getElementById('input-form')
+        const inputView = document.getElementById('inputView');
+        const loadingView = document.getElementById('loadingView');
+
+        form.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        // Get the user's input
+        const cheggLink = document.getElementById('cheggLink').value;
+
+        // Show the loading message
+        inputView.style.display = 'none';
+        loadingView.style.display = 'block';
+        
+        // Send the user's input to the server
+        const response = await fetch('/api-test/get-result', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'url': cheggLink }),
+        });
+        
+        // Get the response from the server
+        const data = await response.json();
+        
+        window.location.href = data['result_url']
+        
+        });
+
+        function execOnLoad() {
+            loadingView.style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
