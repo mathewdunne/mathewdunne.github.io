@@ -11559,24 +11559,29 @@ body {
 .masthead {
   position: relative;
   width: 100%;
-  height: auto;
+  height: 100vh;
+  /* Change height to 100% of the viewport height */
   min-height: 35rem;
+  /* You can adjust or remove this if needed */
   padding: 15rem 0;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 75%, #000 100%), url("../assets/img/bg-masthead.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-size: cover;
+  /* Ensures the background covers the entire element */
 }
-.masthead h1, .masthead .h1 {
+.masthead h1,
+.masthead .h1 {
   font-family: "Varela Round", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 2.5rem;
   line-height: 2.5rem;
   letter-spacing: 0.8rem;
-  background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+  background: linear-gradient(to right, rgba(173, 216, 230, 0.9), rgba(135, 206, 250, 0.9));
+  /* Light blue gradient */
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
-          background-clip: text;
+  background-clip: text;
 }
 .masthead h2, .masthead .h2 {
   max-width: 20rem;
