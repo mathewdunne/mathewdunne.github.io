@@ -24,8 +24,7 @@ function App() {
           <p className="text-gray-300 text-base md:text-lg leading-relaxed">
             Hi, my name is Matt.
             <br />I use this domain for personal projects.
-            <br />
-            Check out my links below:
+            <br />Check out my links below:
           </p>
         </motion.div>
 
