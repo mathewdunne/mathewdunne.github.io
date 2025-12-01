@@ -1,23 +1,23 @@
-import { motion } from 'framer-motion';
-import logoImage from '../assets/logo.png';
+import { motion } from "framer-motion";
+import logoImage from "../assets/logo.png";
 
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 const sizeClasses = {
-  sm: 'w-12 h-12',
-  md: 'w-20 h-20',
-  lg: 'w-32 h-32',
+  sm: "w-12 h-12",
+  md: "w-20 h-20",
+  lg: "w-32 h-32",
 };
 
-export default function Logo({ size = 'lg' }: LogoProps) {
+export default function Logo({ size = "lg" }: LogoProps) {
   return (
     <motion.div
       initial={{ scale: 0, rotate: -180 }}
       animate={{ scale: 1, rotate: 0 }}
       transition={{
-        type: 'spring',
+        type: "spring",
         stiffness: 260,
         damping: 20,
         delay: 0.1,

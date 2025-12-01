@@ -34,13 +34,13 @@ src/
 Edit `src/constants/socialLinks.ts` to add or modify your social media links:
 
 ```typescript
-import { FaGithub } from 'react-icons/fa6';
+import { FaGithub } from "react-icons/fa6";
 
 export const socialLinks: SocialLink[] = [
   {
-    icon: FaGithub,         // Icon from react-icons
-    title: 'GitHub',        // Display name
-    url: 'https://...',     // Your URL
+    icon: FaGithub, // Icon from react-icons
+    title: "GitHub", // Display name
+    url: "https://...", // Your URL
   },
   // Add more links...
 ];
@@ -51,11 +51,13 @@ export const socialLinks: SocialLink[] = [
 The project uses [React Icons](https://react-icons.github.io/react-icons/) with Font Awesome 6. Some popular icons:
 
 **From `react-icons/fa6` (Font Awesome 6):**
+
 - `FaGithub`, `FaLinkedin`, `FaTwitter`, `FaInstagram`, `FaFacebook`
 - `FaYoutube`, `FaTwitch`, `FaDiscord`, `FaSpotify`
 - `FaCode`, `FaBriefcase`, `FaEnvelope`
 
 **From other icon sets:**
+
 - `MdEmail` (Material Design)
 - `HiGlobeAlt` (Heroicons)
 - Browse all available icons at [react-icons.github.io](https://react-icons.github.io/react-icons/)
@@ -97,21 +99,25 @@ colors: {
 ## 🛠️ Development
 
 ### Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### Run Development Server
+
 ```bash
 npm run dev
 ```
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
 
 ### Preview Production Build
+
 ```bash
 npm run preview
 ```
