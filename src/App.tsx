@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { motion } from 'framer-motion';
+import Header from './components/Header';
+import LinkCard from './components/LinkCard';
+import { socialLinks } from './constants/socialLinks';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-2xl">
+              <Header />
+
+              {/* About Section */}
+              <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  className="text-center mb-8 px-4"
+              >
+                  <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+                      Hi, my name is Matt.
+                      <br />I use this domain for personal projects. 
+                      <br />Check out my links below:
+                  </p>
+              </motion.div>
+
+              <main className="flex flex-col items-center gap-4">
+                  {socialLinks.map((link, index) => (
+                      <LinkCard
+                          key={link.title}
+                          icon={link.icon}
+                          title={link.title}
+                          url={link.url}
+                          delay={0.7 + index * 0.1}
+                      />
+                  ))}
+              </main>
+
+              {/* Footer */}
+              <footer className="mt-16 text-center">
+                  <p className="text-gray-500 text-sm">
+                      © {new Date().getFullYear()} Mathew Dunne. All rights
+                      reserved.{" "}
+                      <a
+                          href="https://github.com/mathewdunne/mathewdunne.github.io"
+                          className="underline"
+                      >
+                          View Source
+                      </a>
+                  </p>
+              </footer>
+          </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  );
 }
 
-export default App
+export default App;
