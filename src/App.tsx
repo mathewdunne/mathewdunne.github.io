@@ -2,10 +2,14 @@ import { motion } from 'framer-motion';
 import Header from './components/Header';
 import LinkCard from './components/LinkCard';
 import { socialLinks } from './constants/socialLinks';
+import { ShootingStars } from "@/components/ui/shooting-stars";
+import { StarsBackground } from "@/components/ui/stars-background";
 
 function App() {
   return (
       <div className="min-h-screen flex items-center justify-center px-4 py-12">
+          <ShootingStars minDelay={600} maxDelay={4000} maxSpeed={15}/>
+          <StarsBackground />
           <div className="w-full max-w-2xl">
               <Header />
 
@@ -18,8 +22,9 @@ function App() {
               >
                   <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                       Hi, my name is Matt.
-                      <br />I use this domain for personal projects. 
-                      <br />Check out my links below:
+                      <br />I use this domain for personal projects.
+                      <br />
+                      Check out my links below:
                   </p>
               </motion.div>
 
@@ -36,10 +41,11 @@ function App() {
               </main>
 
               {/* Footer */}
-              <footer className="mt-16 text-center">
+              <footer className="mt-12 text-center">
                   <p className="text-gray-500 text-sm">
-                      © {new Date().getFullYear()} Mathew Dunne. All rights
-                      reserved.{" "}
+                      © {new Date().getFullYear()} Mathew Dunne. 
+                      <br />Hosted using
+                      GitHub Pages.{" "}
                       <a
                           href="https://github.com/mathewdunne/mathewdunne.github.io"
                           className="underline"
