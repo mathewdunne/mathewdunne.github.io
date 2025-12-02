@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Header from "./components/Header";
 import LinkCard from "./components/LinkCard";
 import SpotifyNowPlaying from "./components/SpotifyNowPlaying";
+import { MadeWithSection } from "./components/MadeWith";
 import { socialLinks } from "./constants/socialLinks";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
@@ -9,7 +10,13 @@ import { StarsBackground } from "@/components/ui/stars-background";
 function App() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <ShootingStars minDelay={600} maxDelay={4000} maxSpeed={15} />
+      <ShootingStars
+        minDelay={600}
+        maxDelay={4000}
+        maxSpeed={10}
+        starHeight={4}
+        starWidth={16}
+      />
       <StarsBackground />
       <div className="w-full max-w-2xl">
         <Header />
@@ -24,7 +31,8 @@ function App() {
           <p className="text-gray-300 text-base md:text-lg leading-relaxed">
             Hi, my name is Matt.
             <br />I use this domain for personal projects.
-            <br />Check out my links below:
+            <br />
+            Check out my links below:
           </p>
         </motion.div>
 
@@ -44,6 +52,8 @@ function App() {
 
         {/* Footer */}
         <footer className="mt-12 text-center">
+          <MadeWithSection />
+
           <p className="text-gray-500 text-sm">
             © {new Date().getFullYear()} Mathew Dunne.
             <br />
