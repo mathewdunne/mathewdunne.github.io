@@ -16,9 +16,10 @@ function App() {
         maxSpeed={10}
         starHeight={4}
         starWidth={16}
+        className="fixed"
       />
-      <StarsBackground />
-      <div className="w-full max-w-2xl">
+      <StarsBackground className="fixed" />
+      <div className="relative w-full max-w-2xl">
         <Header />
 
         {/* About Section */}
