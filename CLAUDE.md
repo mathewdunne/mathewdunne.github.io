@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a personal portfolio website with a linktree-style layout deployed to GitHub Pages at `mathewdunne.github.io`. The site features an animated starfield background, real-time Spotify integration showing currently playing music, and social media links.
+This is a personal portfolio website with a linktree-style layout deployed to Cloudflare Pages. The site features an animated starfield background, real-time Spotify integration showing currently playing music, and social media links.
 
 ## Tech Stack
 
@@ -77,12 +77,10 @@ All animations use Framer Motion with staggered delays:
 
 ## Deployment
 
-The site deploys automatically to GitHub Pages via `.github/workflows/deploy.yml`:
+The site deploys automatically to Cloudflare Pages via the Cloudflare dashboard (no CI script in the repo). Pushes to `main` trigger a build and deploy. Build settings configured in the dashboard:
 
-- Triggers on pushes to `main` branch
-- Builds the project (`npm run build`)
-- Deploys `./dist` folder to GitHub Pages
-- Custom domain configured via `CNAME` file
+- Build command: `npm run build`
+- Output directory: `dist`
 
 ## Project-Specific Notes
 

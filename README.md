@@ -40,7 +40,7 @@ npm run preview
 
 ## 🌐 Deployment
 
-Deployed to GitHub Pages at [mathewdunne.github.io](https://mathewdunne.github.io)
+Deployed to Cloudflare Pages. Deployment is configured via the Cloudflare dashboard.
 
 ---
 
